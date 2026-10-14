@@ -188,28 +188,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             )}
           </button>
         </form>
-
-        {/* Admin hint info for owner */}
-        <div className="mt-5 pt-4 border-t border-neutral-800 text-center text-[11px] text-gray-400">
-          <div className="inline-flex items-center gap-1 text-amber-300/80 mb-1">
-            <Shield className="w-3 h-3 text-amber-400" />
-            <span>Yönetici Girişi</span>
-          </div>
-          <p className="text-[10px] text-gray-500 mb-2">
-            Kayıtlı sistem yöneticisi: <span className="font-mono text-amber-400 font-semibold">muslumaltinarr06@gmail.com</span>
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              setMode('login');
-              setEmail('muslumaltinarr06@gmail.com');
-              setPassword('muslum1234');
-            }}
-            className="px-3 py-1 rounded-lg bg-neutral-900 border border-amber-500/30 text-amber-300 text-[10px] font-bold hover:bg-neutral-800"
-          >
-            Yönetici Bilgilerini Otomatik Doldur
-          </button>
-        </div>
       </div>
     </div>
   );

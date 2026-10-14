@@ -18,14 +18,13 @@ import {
   Save,
   X,
   Crown,
-  Zap,
   Search,
   Calendar,
   Award,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { PaymentRequest, RaceDay, RaceLeg, HorsePrediction, BankSettings, User } from '../types';
+import { PaymentRequest, RaceDay, RaceLeg, BankSettings, User } from '../types';
 import { useAuth } from '../context/AuthContext';
 
 interface AdminPanelProps {
@@ -173,20 +172,104 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp }) => {
     }
   }, [isAdmin, token]);
 
+  const { login, logout } = useAuth();
+  const [adminEmailInput, setAdminEmailInput] = useState('muslumaltinarr06@gmail.com');
+  const [adminPasswordInput, setAdminPasswordInput] = useState('');
+  const [adminLoginLoading, setAdminLoginLoading] = useState(false);
+  const [adminLoginError, setAdminLoginError] = useState<string | null>(null);
+
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminLoginLoading(true);
+    setAdminLoginError(null);
+
+    const res = await login(adminEmailInput, adminPasswordInput);
+    setAdminLoginLoading(false);
+
+    if (!res.success) {
+      setAdminLoginError(res.error || 'Geçersiz yönetici bilgileri.');
+    }
+  };
+
   if (!isAdmin) {
     return (
-      <div className="max-w-md mx-auto my-12 p-6 rounded-3xl bg-neutral-900 border border-red-500/30 text-center space-y-4">
-        <Shield className="w-12 h-12 text-red-500 mx-auto" />
-        <h2 className="text-xl font-bold text-white">Yetkisiz Erişim</h2>
-        <p className="text-xs text-gray-400">
-          Bu alan yalnızca yetkili yönetici hesabına açıktır.
-        </p>
-        <button
-          onClick={onBackToApp}
-          className="px-4 py-2 rounded-xl bg-[#D4AF37] text-black font-bold text-xs"
-        >
-          Ana Sayfaya Dön
-        </button>
+      <div className="min-h-screen bg-[#080808] flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-gradient-to-b from-[#181612] via-[#0E0E10] to-[#080809] border border-[#D4AF37]/50 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-[#D4AF37]/20 text-center space-y-6">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/40 flex items-center justify-center mx-auto text-amber-400">
+            <Shield className="w-8 h-8" />
+          </div>
+
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-300 text-[11px] font-bold uppercase mb-2 border border-amber-500/20">
+              <Crown className="w-3 h-3 text-amber-400" />
+              Özel Yönetici Portalı
+            </div>
+            <h2 className="cinzel text-xl sm:text-2xl font-bold text-white">
+              Müslüm VIP Yönetici Girişi
+            </h2>
+            <p className="text-xs text-gray-400 mt-1">
+              Bu alan yalnızca yetkili sistem yöneticisine özeldir.
+            </p>
+          </div>
+
+          {adminLoginError && (
+            <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs flex items-center gap-2 text-left">
+              <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+              <span>{adminLoginError}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleAdminLogin} className="space-y-3.5 text-left">
+            <div>
+              <label className="block text-xs font-semibold text-gray-300 mb-1">
+                Yönetici E-posta
+              </label>
+              <input
+                type="email"
+                required
+                value={adminEmailInput}
+                onChange={e => setAdminEmailInput(e.target.value)}
+                placeholder="muslumaltinarr06@gmail.com"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-900 border border-neutral-700 text-white text-sm focus:border-amber-400 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-300 mb-1">
+                Yönetici Şifresi
+              </label>
+              <input
+                type="password"
+                required
+                value={adminPasswordInput}
+                onChange={e => setAdminPasswordInput(e.target.value)}
+                placeholder="••••••••"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-900 border border-neutral-700 text-white text-sm focus:border-amber-400 focus:outline-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={adminLoginLoading}
+              className="w-full py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-[#D4AF37] via-[#F3E5AB] to-[#D4AF37] text-black hover:brightness-110 active:scale-95 transition-all shadow-md shadow-amber-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {adminLoginLoading ? (
+                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <span>Yönetici Olarak Giriş Yap</span>
+              )}
+            </button>
+          </form>
+
+          <div className="pt-2 border-t border-neutral-800">
+            <button
+              onClick={onBackToApp}
+              className="text-xs text-gray-400 hover:text-amber-300 transition-colors"
+            >
+              ← Kullanıcı / Üye Sayfasına Dön
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -358,7 +441,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="hidden md:flex flex-col text-right mr-2">
+            <span className="text-xs font-bold text-amber-300">{user?.name}</span>
+            <span className="text-[10px] text-gray-400 font-mono">{user?.email}</span>
+          </div>
           <button
             onClick={() => {
               fetchStats();
@@ -373,9 +460,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp }) => {
           </button>
           <button
             onClick={onBackToApp}
-            className="px-4 py-2.5 rounded-xl bg-[#D4AF37] text-black font-bold text-xs hover:brightness-110"
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#AA771C] text-black font-extrabold text-xs hover:brightness-110 shadow-md flex items-center gap-1.5"
           >
-            Uygulamaya Dön
+            <span>👁️ Kullanıcı Sitesine Geç</span>
+          </button>
+          <button
+            onClick={logout}
+            className="px-3 py-2.5 rounded-xl bg-neutral-800 hover:bg-red-950 text-gray-300 hover:text-red-300 border border-neutral-700 text-xs font-bold transition-colors"
+            title="Oturumu Kapat"
+          >
+            Çıkış
           </button>
         </div>
       </div>
@@ -1145,48 +1239,6 @@ const FullRaceEditorModal: React.FC<FullRaceEditorModalProps> = ({ race, onClose
     setActiveLegIndex(Math.max(0, idx - 1));
   };
 
-  // Add Horse inside current Leg
-  const handleAddHorse = () => {
-    if (!currentLeg) return;
-    const nextNum = currentLeg.horses.length > 0 ? Math.max(...currentLeg.horses.map(h => h.number)) + 1 : 1;
-    const newHorse: HorsePrediction = {
-      number: nextNum,
-      name: '',
-      jockey: '',
-      weight: '56 kg',
-      form: '',
-      odds: '',
-      isBanko: false,
-      isSurprise: false,
-      isPlase: false,
-      notes: '',
-    };
-    const updatedHorses = [...currentLeg.horses, newHorse];
-    const updatedRaces = [...formData.races];
-    updatedRaces[activeLegIndex] = { ...currentLeg, horses: updatedHorses };
-    setFormData({ ...formData, races: updatedRaces });
-  };
-
-  // Update Horse inside current Leg
-  const handleUpdateHorse = (hIdx: number, updates: Partial<HorsePrediction>) => {
-    if (!currentLeg) return;
-    const updatedHorses = [...currentLeg.horses];
-    updatedHorses[hIdx] = { ...updatedHorses[hIdx], ...updates };
-    const updatedRaces = [...formData.races];
-    updatedRaces[activeLegIndex] = { ...currentLeg, horses: updatedHorses };
-    setFormData({ ...formData, races: updatedRaces });
-  };
-
-  // Remove Horse
-  const handleRemoveHorse = (hIdx: number) => {
-    if (!currentLeg) return;
-    const updatedHorses = [...currentLeg.horses];
-    updatedHorses.splice(hIdx, 1);
-    const updatedRaces = [...formData.races];
-    updatedRaces[activeLegIndex] = { ...currentLeg, horses: updatedHorses };
-    setFormData({ ...formData, races: updatedRaces });
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/90 backdrop-blur-md overflow-y-auto">
       <div className="relative w-full max-w-5xl bg-neutral-900 border border-[#D4AF37]/50 rounded-3xl p-4 sm:p-7 my-auto max-h-[92vh] flex flex-col">
@@ -1197,7 +1249,7 @@ const FullRaceEditorModal: React.FC<FullRaceEditorModalProps> = ({ race, onClose
               {formData.id ? 'Yarış Gününü & Analizlerini Düzenle' : 'Yeni Yarış Günü & Bülten Ekle'}
             </h3>
             <p className="text-[11px] text-gray-400">
-              Koşuları, at isimlerini, jokeyleri, bankoları ve detaylı VIP analiz yazılarını yönetin.
+              Koşuları, ayakları, kupon şablonunu ve VIP analiz yazılarını yönetin.
             </p>
           </div>
           <button onClick={onClose} className="p-2 rounded-xl bg-neutral-800 text-gray-400 hover:text-white">
@@ -1340,11 +1392,11 @@ const FullRaceEditorModal: React.FC<FullRaceEditorModalProps> = ({ race, onClose
             </div>
           </div>
 
-          {/* Section 3: Legs (Koşular) & Horses Management */}
+          {/* Section 3: Legs (Koşular) Management */}
           <div className="p-4 rounded-2xl bg-black/40 border border-neutral-800 space-y-4">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-xs font-bold text-amber-300 uppercase">
-                3. Koşular ({formData.races.length}) ve Koşacak Safkanlar
+                3. Koşular & Ayaklar ({formData.races.length})
               </span>
               <button
                 type="button"
@@ -1449,172 +1501,6 @@ const FullRaceEditorModal: React.FC<FullRaceEditorModalProps> = ({ race, onClose
                       placeholder="Handikap 16 / DHT"
                       className="w-full px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-white"
                     />
-                  </div>
-                </div>
-
-                {/* HORSES TABLE & BUILDER */}
-                <div className="space-y-3 pt-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-white text-xs">
-                      Bu Koşuda Yarışacak Atlar ({currentLeg.horses.length})
-                    </span>
-                    <button
-                      type="button"
-                      onClick={handleAddHorse}
-                      className="px-3 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-bold hover:bg-amber-500/30 flex items-center gap-1"
-                    >
-                      <Plus className="w-3 h-3" />
-                      <span>+ At Ekle</span>
-                    </button>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    {currentLeg.horses.map((horse, hIdx) => (
-                      <div
-                        key={hIdx}
-                        className={`p-3 rounded-xl border transition-all ${
-                          horse.isBanko
-                            ? 'bg-amber-950/40 border-amber-400/60'
-                            : horse.isSurprise
-                            ? 'bg-orange-950/30 border-orange-500/40'
-                            : 'bg-neutral-900 border-neutral-800'
-                        }`}
-                      >
-                        <div className="grid grid-cols-12 gap-2 items-center">
-                          {/* Horse Number */}
-                          <div className="col-span-2 sm:col-span-1">
-                            <label className="block text-[10px] text-gray-500 mb-0.5">No</label>
-                            <input
-                              type="number"
-                              value={horse.number}
-                              onChange={e => handleUpdateHorse(hIdx, { number: Number(e.target.value) })}
-                              className="w-full px-2 py-1 text-center font-bold rounded bg-black border border-neutral-700 text-amber-300"
-                            />
-                          </div>
-
-                          {/* Horse Name */}
-                          <div className="col-span-10 sm:col-span-3">
-                            <label className="block text-[10px] text-gray-500 mb-0.5">At İsmi</label>
-                            <input
-                              type="text"
-                              value={horse.name}
-                              onChange={e => handleUpdateHorse(hIdx, { name: e.target.value.toUpperCase() })}
-                              placeholder="AT İSMİ"
-                              className="w-full px-2.5 py-1 font-bold rounded bg-black border border-neutral-700 text-white"
-                            />
-                          </div>
-
-                          {/* Jockey */}
-                          <div className="col-span-6 sm:col-span-2">
-                            <label className="block text-[10px] text-gray-500 mb-0.5">Jokey</label>
-                            <input
-                              type="text"
-                              value={horse.jockey}
-                              onChange={e => handleUpdateHorse(hIdx, { jockey: e.target.value })}
-                              placeholder="Ahmet Çelik"
-                              className="w-full px-2 py-1 rounded bg-black border border-neutral-700 text-gray-200"
-                            />
-                          </div>
-
-                          {/* Weight */}
-                          <div className="col-span-3 sm:col-span-1">
-                            <label className="block text-[10px] text-gray-500 mb-0.5">Kilo</label>
-                            <input
-                              type="text"
-                              value={horse.weight || ''}
-                              onChange={e => handleUpdateHorse(hIdx, { weight: e.target.value })}
-                              placeholder="58 kg"
-                              className="w-full px-1.5 py-1 text-center rounded bg-black border border-neutral-700 text-gray-200"
-                            />
-                          </div>
-
-                          {/* Form */}
-                          <div className="col-span-3 sm:col-span-1">
-                            <label className="block text-[10px] text-gray-500 mb-0.5">Form</label>
-                            <input
-                              type="text"
-                              value={horse.form || ''}
-                              onChange={e => handleUpdateHorse(hIdx, { form: e.target.value })}
-                              placeholder="1-2-1"
-                              className="w-full px-1.5 py-1 text-center rounded bg-black border border-neutral-700 text-gray-200"
-                            />
-                          </div>
-
-                          {/* BADGES TOGGLE: Banko / Sürpriz / Plase */}
-                          <div className="col-span-10 sm:col-span-3 flex items-center gap-1.5 pt-3 sm:pt-0">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleUpdateHorse(hIdx, {
-                                  isBanko: !horse.isBanko,
-                                  isSurprise: false,
-                                })
-                              }
-                              className={`px-2 py-1 rounded text-[10px] font-black flex items-center gap-0.5 transition-all ${
-                                horse.isBanko
-                                  ? 'bg-[#D4AF37] text-black shadow-sm'
-                                  : 'bg-neutral-800 text-gray-400 hover:text-white'
-                              }`}
-                            >
-                              <Crown className="w-2.5 h-2.5" />
-                              <span>BANKO</span>
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleUpdateHorse(hIdx, {
-                                  isSurprise: !horse.isSurprise,
-                                  isBanko: false,
-                                })
-                              }
-                              className={`px-2 py-1 rounded text-[10px] font-black flex items-center gap-0.5 transition-all ${
-                                horse.isSurprise
-                                  ? 'bg-orange-500 text-black shadow-sm'
-                                  : 'bg-neutral-800 text-gray-400 hover:text-white'
-                              }`}
-                            >
-                              <Zap className="w-2.5 h-2.5" />
-                              <span>BOMBA</span>
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => handleUpdateHorse(hIdx, { isPlase: !horse.isPlase })}
-                              className={`px-2 py-1 rounded text-[10px] font-bold transition-all ${
-                                horse.isPlase
-                                  ? 'bg-blue-500 text-black shadow-sm'
-                                  : 'bg-neutral-800 text-gray-400 hover:text-white'
-                              }`}
-                            >
-                              <span>PLASE</span>
-                            </button>
-                          </div>
-
-                          {/* Delete Horse */}
-                          <div className="col-span-2 sm:col-span-1 text-right pt-3 sm:pt-0">
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveHorse(hIdx)}
-                              className="p-1 rounded text-red-400 hover:text-red-300 hover:bg-neutral-800"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Horse Note */}
-                        <div className="mt-2">
-                          <input
-                            type="text"
-                            value={horse.notes || ''}
-                            onChange={e => handleUpdateHorse(hIdx, { notes: e.target.value })}
-                            placeholder="At & Jokey İdman Pisti Notu (Örn: Son galobunda formunu koruduğu gözlendi)"
-                            className="w-full px-2.5 py-1 text-[11px] rounded bg-black/60 border border-neutral-800 text-amber-200/90"
-                          />
-                        </div>
-                      </div>
-                    ))}
                   </div>
                 </div>
 

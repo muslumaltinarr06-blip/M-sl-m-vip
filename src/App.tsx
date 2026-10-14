@@ -6,6 +6,7 @@ import { RaceView } from './components/RaceView';
 import { VipModal } from './components/VipModal';
 import { PaymentModal } from './components/PaymentModal';
 import { AuthModal } from './components/AuthModal';
+import { AccountModal } from './components/AccountModal';
 import { MyPaymentsModal } from './components/MyPaymentsModal';
 import { AdminPanel } from './components/AdminPanel';
 import { VipPlanId } from './types';
@@ -16,6 +17,7 @@ function AppContent() {
 
   const [currentTab, setCurrentTab] = useState<string>('races');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isVipModalOpen, setIsVipModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isMyPaymentsModalOpen, setIsMyPaymentsModalOpen] = useState(false);
@@ -27,6 +29,35 @@ function AppContent() {
     setIsPaymentModalOpen(true);
   };
 
+  // Listen to hash changes (#admin)
+  React.useEffect(() => {
+    const handleHash = () => {
+      if (window.location.hash === '#admin' || window.location.pathname === '/admin') {
+        setCurrentTab('admin');
+      }
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
+  // IF ADMIN TAB IS ACTIVE: RENDER ISOLATED EXECUTIVE ADMIN DASHBOARD
+  if (currentTab === 'admin') {
+    return (
+      <div className="min-h-screen bg-[#080808] text-gray-100 flex flex-col">
+        <AdminPanel
+          onBackToApp={() => {
+            setCurrentTab('races');
+            if (window.location.hash === '#admin') {
+              window.history.pushState(null, '', window.location.pathname);
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
+  // PUBLIC MEMBER & VISITOR INTERFACE (100% CLEAN OF ADMIN UI)
   return (
     <div className="min-h-screen bg-[#080808] text-gray-100 flex flex-col selection:bg-amber-500 selection:text-black">
       {/* Top Navbar */}
@@ -34,6 +65,7 @@ function AppContent() {
         currentTab={currentTab}
         onSelectTab={tab => setCurrentTab(tab)}
         onOpenAuth={() => setIsAuthModalOpen(true)}
+        onOpenAccount={() => setIsAccountModalOpen(true)}
         onOpenVip={() => setIsVipModalOpen(true)}
         onOpenAdmin={() => setCurrentTab('admin')}
         onOpenMyPayments={() => setIsMyPaymentsModalOpen(true)}
@@ -41,17 +73,24 @@ function AppContent() {
 
       {/* Main Content Area */}
       <main className="flex-1 pb-24 md:pb-12">
-        {currentTab === 'admin' ? (
-          <AdminPanel onBackToApp={() => setCurrentTab('races')} />
-        ) : (
-          <RaceView
-            onOpenVip={() => setIsVipModalOpen(true)}
-            onOpenAuth={() => setIsAuthModalOpen(true)}
-          />
-        )}
+        <RaceView
+          onOpenVip={() => setIsVipModalOpen(true)}
+          onOpenAuth={() => setIsAuthModalOpen(true)}
+        />
       </main>
 
-      {/* Luxury Footer */}
+      {/* Floating Admin Switcher Button (ONLY visible to verified administrator) */}
+      {isAdmin && (
+        <button
+          onClick={() => setCurrentTab('admin')}
+          className="fixed bottom-20 md:bottom-6 right-4 z-40 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-600 text-black font-extrabold text-xs shadow-2xl shadow-amber-500/40 flex items-center gap-2 hover:brightness-110 active:scale-95 transition-all border border-amber-300"
+        >
+          <Shield className="w-4 h-4 fill-black" />
+          <span>Yönetici Paneline Geç</span>
+        </button>
+      )}
+
+      {/* Luxury Footer (Clean for public) */}
       <footer className="border-t border-[#D4AF37]/15 bg-[#0A0A0C] py-8 text-xs text-gray-400">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           <div className="flex items-center gap-2">
@@ -67,15 +106,6 @@ function AppContent() {
             <button onClick={() => setIsMyPaymentsModalOpen(true)} className="hover:text-amber-300 transition-colors">
               Ödeme Bildirimi
             </button>
-            {isAdmin ? (
-              <button onClick={() => setCurrentTab('admin')} className="text-amber-400 font-bold hover:underline">
-                👑 Yönetici Paneli
-              </button>
-            ) : !user ? (
-              <button onClick={() => setIsAuthModalOpen(true)} className="text-gray-500 hover:text-amber-300 transition-colors">
-                Yönetici Girişi
-              </button>
-            ) : null}
           </div>
 
           <div className="text-[11px] text-gray-500 flex items-center gap-1.5">
@@ -91,6 +121,7 @@ function AppContent() {
         onSelectTab={tab => setCurrentTab(tab)}
         onOpenVip={() => setIsVipModalOpen(true)}
         onOpenAuth={() => setIsAuthModalOpen(true)}
+        onOpenAccount={() => setIsAccountModalOpen(true)}
         onOpenMyPayments={() => setIsMyPaymentsModalOpen(true)}
         onOpenAdmin={() => setCurrentTab('admin')}
       />
@@ -121,6 +152,13 @@ function AppContent() {
         onSuccess={() => {
           // user logged in
         }}
+      />
+
+      <AccountModal
+        isOpen={isAccountModalOpen}
+        onClose={() => setIsAccountModalOpen(false)}
+        onOpenVip={() => setIsVipModalOpen(true)}
+        onOpenMyPayments={() => setIsMyPaymentsModalOpen(true)}
       />
 
       <MyPaymentsModal

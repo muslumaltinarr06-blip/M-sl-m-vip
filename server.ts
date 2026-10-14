@@ -227,8 +227,8 @@ app.get('/api/plans', (req: Request, res: Response) => {
   res.json({ plans: VIP_PLANS });
 });
 
-// Public Bank Settings
-app.get('/api/settings/bank', (req: Request, res: Response) => {
+// Bank Settings (Restricted strictly to authenticated members only)
+app.get('/api/settings/bank', requireAuth, (req: AuthenticatedRequest, res: Response) => {
   const bank = db.getBankSettings();
   res.json({ bankSettings: bank });
 });

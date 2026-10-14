@@ -7,6 +7,7 @@ interface BottomNavProps {
   onSelectTab: (tab: string) => void;
   onOpenVip: () => void;
   onOpenAuth: () => void;
+  onOpenAccount: () => void;
   onOpenMyPayments: () => void;
   onOpenAdmin: () => void;
 }
@@ -16,6 +17,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   onSelectTab,
   onOpenVip,
   onOpenAuth,
+  onOpenAccount,
   onOpenMyPayments,
   onOpenAdmin,
 }) => {
@@ -82,8 +84,16 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 
         {/* Profil / Giriş */}
         <button
-          onClick={onOpenAuth}
-          className="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-gray-200"
+          onClick={() => {
+            if (user) {
+              onOpenAccount();
+            } else {
+              onOpenAuth();
+            }
+          }}
+          className={`flex flex-col items-center justify-center gap-1 transition-all ${
+            user ? 'text-amber-300' : 'text-gray-400 hover:text-gray-200'
+          }`}
         >
           <UserIcon className="w-5 h-5" />
           <span className="text-[10px] font-semibold">

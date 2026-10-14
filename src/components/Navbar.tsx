@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
   onOpenAuth: () => void;
+  onOpenAccount: () => void;
   onOpenVip: () => void;
   onOpenAdmin: () => void;
   onOpenMyPayments: () => void;
@@ -13,6 +14,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenAuth,
+  onOpenAccount,
   onOpenVip,
   onOpenAdmin,
   onOpenMyPayments,
@@ -123,10 +125,20 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* User Button / Login */}
           {user ? (
             <div className="flex items-center gap-2">
-              <div className="hidden lg:flex flex-col text-right">
-                <span className="text-xs font-bold text-gray-200 truncate max-w-[120px]">{user.name}</span>
-                <span className="text-[10px] text-amber-300/80">{user.role === 'admin' ? 'Yönetici' : 'Üye'}</span>
-              </div>
+              <button
+                type="button"
+                onClick={onOpenAccount}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900/90 border border-neutral-800 hover:border-[#D4AF37]/50 text-left transition-all"
+                title="Hesap Bilgilerim"
+              >
+                <div className="w-6 h-6 rounded-lg bg-[#D4AF37] text-black font-extrabold text-xs flex items-center justify-center">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="hidden lg:flex flex-col text-left">
+                  <span className="text-xs font-bold text-gray-200 truncate max-w-[120px]">{user.name}</span>
+                  <span className="text-[10px] text-amber-300/80">{user.role === 'admin' ? 'Yönetici' : 'Hesabım'}</span>
+                </div>
+              </button>
               <button
                 onClick={logout}
                 title="Çıkış Yap"

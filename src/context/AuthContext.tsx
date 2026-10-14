@@ -25,14 +25,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [bankSettings, setBankSettings] = useState<BankSettings | null>(null);
 
   const fetchBankSettings = useCallback(async () => {
+    const currentToken = localStorage.getItem('muslum_vip_token');
+    if (!currentToken) {
+      setBankSettings(null);
+      return;
+    }
+
     try {
-      const res = await fetch('/api/settings/bank');
+      const res = await fetch('/api/settings/bank', {
+        headers: {
+          Authorization: `Bearer ${currentToken}`,
+        },
+      });
       if (res.ok) {
         const data = await res.json();
         setBankSettings(data.bankSettings);
+      } else {
+        setBankSettings(null);
       }
     } catch (err) {
       console.error('Failed to fetch bank settings:', err);
+      setBankSettings(null);
     }
   }, []);
 
@@ -94,6 +107,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       localStorage.setItem('muslum_vip_token', data.token);
       setToken(data.token);
       setUser(data.user);
+      fetchBankSettings();
       return { success: true };
     } catch (err) {
       return { success: false, error: 'Sunucuya bağlanırken hata oluştu.' };
@@ -116,6 +130,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       localStorage.setItem('muslum_vip_token', data.token);
       setToken(data.token);
       setUser(data.user);
+      fetchBankSettings();
       return { success: true };
     } catch (err) {
       return { success: false, error: 'Sunucuya bağlanırken hata oluştu.' };

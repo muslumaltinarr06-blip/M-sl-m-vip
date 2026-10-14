@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Copy, Check, Upload, AlertCircle, ShieldCheck, Clock, ArrowRight, Building, User, FileText, Image as ImageIcon } from 'lucide-react';
+import { X, Copy, Check, Upload, AlertCircle, ShieldCheck, Clock, ArrowRight, Building, User, FileText, Image as ImageIcon, Lock } from 'lucide-react';
 import { VipPlanId } from '../types';
 import { useAuth } from '../context/AuthContext';
 
@@ -138,22 +138,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           <X className="w-5 h-5" />
         </button>
 
-        {/* Not Logged In Notice */}
-        {!user && !isSubmitted && (
-          <div className="mb-6 p-4 rounded-2xl bg-amber-950/40 border border-amber-600/40 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 text-xs text-amber-200">
-              <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-              <span>Ödeme bildirimi yapabilmek ve VIP üyeliğinizi başlatabilmek için giriş yapmalısınız.</span>
-            </div>
-            <button
-              onClick={onRequireAuth}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#D4AF37] text-black shrink-0 hover:brightness-110"
-            >
-              Giriş Yap
-            </button>
-          </div>
-        )}
-
         {isSubmitted ? (
           /* SUCCESS SCREEN */
           <div className="text-center py-6">
@@ -198,8 +182,56 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               Tamam, Kapat
             </button>
           </div>
+        ) : !user ? (
+          /* GUEST / NOT LOGGED IN: IBAN IS STRICTLY HIDDEN */
+          <div className="space-y-6">
+            <div className="text-center sm:text-left">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-300 text-[11px] font-bold uppercase mb-2 border border-amber-500/20">
+                <Building className="w-3 h-3 text-amber-400" />
+                VIP Paket Satın Alımı
+              </div>
+              <h2 className="cinzel text-xl sm:text-2xl font-bold text-white">
+                {currentPlan.name} Seçildi
+              </h2>
+              <div className="flex items-center justify-center sm:justify-start gap-2 mt-1">
+                <span className="text-2xl font-extrabold gold-gradient-text cinzel">
+                  {currentPlan.price.toLocaleString('tr-TR')} TL
+                </span>
+                <span className="text-xs text-gray-400">({currentPlan.days} Gün Süre)</span>
+              </div>
+            </div>
+
+            <div className="p-6 sm:p-8 rounded-3xl bg-neutral-900/90 border border-amber-500/30 text-center space-y-4 shadow-xl">
+              <div className="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-400/30 flex items-center justify-center mx-auto text-amber-400">
+                <Lock className="w-7 h-7" />
+              </div>
+              <div className="space-y-1.5">
+                <h3 className="cinzel text-lg sm:text-xl font-bold text-white">
+                  IBAN Bilgileri Yalnızca Üyelerimize Açıktır
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-300 max-w-md mx-auto leading-relaxed">
+                  Banka hesap numarası, IBAN ve ödeme referans kodunu görüntüleyebilmek için lütfen önce üye girişi yapınız.
+                </p>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={onRequireAuth}
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#F3E5AB] to-[#D4AF37] text-black font-extrabold text-xs sm:text-sm shadow-lg shadow-amber-500/25 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 mx-auto"
+                >
+                  <User className="w-4 h-4" />
+                  <span>Giriş Yap veya Ücretsiz Üye Ol</span>
+                </button>
+              </div>
+
+              <p className="text-[11px] text-gray-400">
+                🔒 Kayıt olmak 10 saniye sürer ve tamamen ücretsizdir.
+              </p>
+            </div>
+          </div>
         ) : (
-          /* PAYMENT FORM & IBAN DETAILS */
+          /* USER LOGGED IN: SHOW FULL IBAN DETAILS & PAYMENT NOTIFICATION FORM */
           <div>
             <div className="mb-6">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-300 text-[11px] font-bold uppercase mb-2 border border-amber-500/20">
